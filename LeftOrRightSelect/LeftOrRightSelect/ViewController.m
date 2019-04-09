@@ -27,6 +27,7 @@
     [self setUI];
     // Do any additional setup after loading the view, typically from a nib.
 }
+#pragma mark -设置UI
 -(void)setUI{
     NSArray *colorArr = @[[UIColor orangeColor],[UIColor blueColor],[UIColor greenColor],[UIColor redColor]];
     for (int i = 0; i<4; i++) {
@@ -36,7 +37,9 @@
         if (i ==3) {
             index = 2;
         }
+        //设置中心 （递增 Space间距，Scale缩放,呈现梯田效果）
         view.center = CGPointMake(Screen_W/2, Screen_H/2 +(400 *ImageScale*index/2) + ImageSpace * index);
+        // scale  缩放
         view.transform =  CGAffineTransformMakeScale(1 - ImageScale*index, 1 - ImageScale *index);
         view.backgroundColor = colorArr[i];
     
@@ -54,7 +57,23 @@
             self.lastView = view;
         }
     }
+    
+    UIButton *likeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [likeButton addTarget:self action:@selector(like:) forControlEvents:7];
+    [likeButton setTitle:@"LIKE" forState:0];
+    [likeButton setTitleColor:[UIColor blackColor] forState:0];
+    likeButton.frame = CGRectMake(50, 200, 50, 30);
+    [self.view addSubview:likeButton];
+    
+    UIButton *dontLikeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [dontLikeButton addTarget:self action:@selector(dontLike:) forControlEvents:7];
+    [dontLikeButton setTitle:@"PASS" forState:0];
+    [dontLikeButton setTitleColor:[UIColor blackColor] forState:0];
+    dontLikeButton.frame = CGRectMake(Screen_W - 80, 200, 50, 30);
+    [self.view addSubview:dontLikeButton];
+    
 }
+#pragma mark -拖动事件
 -(void)panHandle:(UIPanGestureRecognizer *)pan{
     UIView *view = pan.view;
     if (pan.state == UIGestureRecognizerStateBegan) {
@@ -91,7 +110,7 @@
         }
     }
 }
-
+#pragma mark -动画
 -(void)animationBlowViewWithXOffPercent:(CGFloat)XCoffPercent{
     for (UIView *view in self.viewArray) {
         if (view != self.firstView && view.tag != 103) {
@@ -101,9 +120,8 @@
             view.transform = CGAffineTransformMakeScale(scale, scale);
         }
     }
-    
-    
 }
+#pragma mark -重置视图
 -(void)viewRemove{
     [self.viewArray removeObject:self.firstView];
     [self.viewArray addObject:self.firstView];
@@ -122,5 +140,49 @@
     currentView.userInteractionEnabled = YES;
     self.firstView = currentView;
 }
-
+-(void)like:(UIButton *)sender{
+    sender.userInteractionEnabled = NO;
+    [UIView animateWithDuration:0.1 animations:^{
+        self.firstView.center = CGPointMake(Screen_W/2 - 5, Screen_H/2);
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.firstView.center = CGPointMake(-300, Screen_H/2 +50);
+            self.firstView.transform  = CGAffineTransformMakeRotation(-M_PI_4/2);
+            for (UIView *view in self.viewArray) {
+                if (view.tag != 100 && view.tag != 103) {
+                    NSInteger index = view.tag - 100;
+                    view.center = CGPointMake(Screen_W/2, Screen_H/2  + 400*index*ImageScale/2+ImageSpace*index - ImageSpace - (400*ImageScale*index/2)/index);
+                    CGFloat scale = 1-index*ImageScale + ImageScale;
+                    view.transform = CGAffineTransformMakeScale(scale, scale);
+                }
+            }
+        } completion:^(BOOL finished) {
+            sender.userInteractionEnabled = YES;
+            [self viewRemove];
+        }];
+    }];
+}
+-(void)dontLike:(UIButton *)sender{
+    sender.userInteractionEnabled = NO;
+    [UIView animateWithDuration:0.1 animations:^{
+        self.firstView.center = CGPointMake(Screen_W/2 + 5, Screen_H/2);
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.firstView.center = CGPointMake(Screen_W + 300, Screen_H/2 +50);
+            self.firstView.transform  = CGAffineTransformMakeRotation(-M_PI_4/2);
+            for (UIView *view in self.viewArray) {
+                if (view.tag != 100 && view.tag != 103) {
+                    NSInteger index = view.tag - 100;
+                    view.center = CGPointMake(Screen_W/2, Screen_H/2  + 400*index*ImageScale/2+ImageSpace*index - ImageSpace - (400*ImageScale*index/2)/index);
+                    CGFloat scale = 1-index*ImageScale + ImageScale;
+                    view.transform = CGAffineTransformMakeScale(scale, scale);
+                }
+            }
+        } completion:^(BOOL finished) {
+            sender.userInteractionEnabled = YES;
+            [self viewRemove];
+        }];
+    }];
+    
+}
 @end
