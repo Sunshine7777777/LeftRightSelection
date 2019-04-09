@@ -169,7 +169,7 @@
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:0.3 animations:^{
             self.firstView.center = CGPointMake(Screen_W + 300, Screen_H/2 +50);
-            self.firstView.transform  = CGAffineTransformMakeRotation(-M_PI_4/2);
+            self.firstView.transform  = CGAffineTransformMakeRotation(M_PI_4/2);
             for (UIView *view in self.viewArray) {
                 if (view.tag != 100 && view.tag != 103) {
                     NSInteger index = view.tag - 100;
